@@ -18,7 +18,7 @@ int buzzer = 10;
 int photoPin = A0;
 int light = 0;
 int tiltSensor = 6;
-int roomTemp = 23.10; // Room temperature to compare to
+int roomTemp = 20.10; // Room temperature to compare to
 float threshold = 2; // Room temperature threshold
 
 const int trigPin = 18;
@@ -40,8 +40,10 @@ void setup() {
   Serial.println();
 }
 
-void loop() {
 
+
+bool checkBadge() {
+    // Look for new cards
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
     return;
@@ -66,8 +68,23 @@ void loop() {
   Serial.print("Message : ");
   content.toUpperCase();
 
+  if(content.substring(1) == "DF 24 91 06"){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Alarm");
+    lcd.setCursor(0,1);
+    lcd.print("Deactivated");
+    delay(5000);
+  }
+}
 
 
+void loop() {
+  if (checkBadge()) {
+    // Deactivate alarm for 2 seconds
+    digitalWrite(buzzer, LOW);
+    delay(5000);
+  }
 
   long duration, distance;
   digitalWrite(trigPin, LOW);
@@ -160,3 +177,53 @@ void loop() {
     }
   }
 }
+
+
+
+/*
+if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  //Show UID on serial monitor
+  Serial.print("UID tag :");
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(mfrc522.uid.uidByte[i], HEX);
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  Serial.print("Message : ");
+  content.toUpperCase();
+
+  if(content.substring(1) == "DF 24 91 06"){
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Alarm");
+    lcd.setCursor(0,1);
+    lcd.print("Deactivated!");
+    delay(1000);
+    lcd.clear();
+    lcd.setCursor(0, 1);
+    for (int i = 1; i <= 10; i++) { // loop for 10 seconds
+    int sec = 0;
+    lcd.print(sec += 1);
+    delay(1000); // wait for 1 second
+  }
+    lcd.clear();
+  }
+  else{
+    lcd.setCursor(0, 0);
+    lcd.print("ID not");
+    lcd.setCursor(0,1);
+    lcd.print("recognised!");
+*/
